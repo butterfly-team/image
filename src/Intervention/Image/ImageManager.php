@@ -12,7 +12,7 @@ class ImageManager
      * @var array
      */
     public $config = array(
-        'driver' => 'gd'
+        'driver' => 'imagick'
     );
 
     /**
@@ -22,6 +22,12 @@ class ImageManager
      */
     public function __construct(array $config = array())
     {
+        if (!extension_loaded('imagick')){
+            $config = array(
+                'driver' => 'gd'
+            );
+        }
+
         $this->checkRequirements();
         $this->configure($config);
     }

@@ -23,7 +23,6 @@ class ResizeCommand extends \Intervention\Image\Commands\AbstractCommand
         foreach ($image as $frame) {
             $frame->getCore()->resizeImage($resized->getWidth(), $resized->getHeight(), \Imagick::FILTER_BOX, 1);
         }
-
         return true;
     }
 }
