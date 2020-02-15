@@ -2,9 +2,7 @@
 
 namespace Intervention\Image\Gd\Commands;
 
-use Intervention\Image\Commands\AbstractCommand;
-
-class GreyscaleCommand extends AbstractCommand
+class GreyscaleCommand extends \Intervention\Image\Commands\AbstractCommand
 {
     /**
      * Turns an image into a greyscale version
@@ -14,6 +12,10 @@ class GreyscaleCommand extends AbstractCommand
      */
     public function execute($image)
     {
-        return imagefilter($image->getCore(), IMG_FILTER_GRAYSCALE);
+        foreach ($image as $frame) {
+            imagefilter($frame->getCore(), IMG_FILTER_GRAYSCALE);
+        }
+
+        return true;
     }
 }

@@ -2,10 +2,9 @@
 
 namespace Intervention\Image\Imagick\Commands;
 
-use Intervention\Image\Commands\AbstractCommand;
-use Intervention\Image\Imagick\Color;
+use \Intervention\Image\Imagick\Color;
 
-class PixelCommand extends AbstractCommand
+class PixelCommand extends \Intervention\Image\Commands\AbstractCommand
 {
     /**
      * Draws one pixel to a given image
@@ -26,6 +25,10 @@ class PixelCommand extends AbstractCommand
         $draw->point($x, $y);
 
         // apply pixel
-        return $image->getCore()->drawImage($draw);
+        foreach ($image as $frame) {
+            $frame->getCore()->drawImage($draw);
+        }
+
+        return true;
     }
 }

@@ -2,9 +2,9 @@
 
 namespace Intervention\Image\Commands;
 
-use Closure;
+use \Closure;
 
-class CircleCommand extends AbstractCommand
+class CircleCommand extends \Intervention\Image\Commands\AbstractCommand
 {
     /**
      * Draw a circle centered on given image
@@ -20,7 +20,8 @@ class CircleCommand extends AbstractCommand
         $callback = $this->argument(3)->type('closure')->value();
 
         $circle_classname = sprintf('\Intervention\Image\%s\Shapes\CircleShape',
-            $image->getDriver()->getDriverName());
+            $image->getDriver()->getDriverName()
+        );
 
         $circle = new $circle_classname($diameter);
 

@@ -32,7 +32,7 @@ class ImageServiceProviderLaravel4 extends ServiceProvider
                 $config->set('imagecache::templates.original', null);
 
                 // setup image manipulator route
-                $app['router']->get($config->get('imagecache::route').'/{template}/{filename}', ['as' => 'imagecache', function ($template, $filename) use ($app, $config) {
+                $app['router']->get($config->get('imagecache::route').'/{template}/{filename}', array('as' => 'imagecache', function ($template, $filename) use ($app, $config) {
 
                     // disable session cookies for image route
                     $app['config']->set('session.driver', 'array');
@@ -56,21 +56,11 @@ class ImageServiceProviderLaravel4 extends ServiceProvider
                     // define template callback
                     $callback = $config->get("imagecache::templates.{$template}");
 
-                    if (is_callable($callback) || class_exists($callback)) {
+                    if (is_callable($callback)) {
 
                         // image manipulation based on callback
                         $content = $app['image']->cache(function ($image) use ($image_path, $callback) {
-                            
-                            switch (true) {
-                                case is_callable($callback):
-                                    return $callback($image->make($image_path));
-                                    break;
-                                
-                                case class_exists($callback):
-                                    return $image->make($image_path)->filter(new $callback);
-                                    break;
-                            }
-
+                            return $callback($image->make($image_path));
                         }, $config->get('imagecache::lifetime'));
 
                     } else {
@@ -83,13 +73,13 @@ class ImageServiceProviderLaravel4 extends ServiceProvider
                     $mime = finfo_buffer(finfo_open(FILEINFO_MIME_TYPE), $content);
 
                     // return http response
-                    return new IlluminateResponse($content, 200, [
+                    return new IlluminateResponse($content, 200, array(
                         'Content-Type' => $mime,
                         'Cache-Control' => 'max-age='.($config->get('imagecache::lifetime')*60).', public',
                         'Etag' => md5($content)
-                    ]);
+                    ));
 
-                }])->where(['template' => join('|', array_keys($config->get('imagecache::templates'))), 'filename' => '[ \w\\.\\/\\-]+']);
+                }))->where(array('template' => join('|', array_keys($config->get('imagecache::templates'))), 'filename' => '[ \w\\.\\/\\-]+'));
             }
         }
     }
@@ -106,7 +96,5 @@ class ImageServiceProviderLaravel4 extends ServiceProvider
         $app['image'] = $app->share(function ($app) {
             return new ImageManager($app['config']->get('image::config'));
         });
-
-        $app->alias('image', 'Intervention\Image\ImageManager');
     }
 }

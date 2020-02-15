@@ -2,10 +2,9 @@
 
 namespace Intervention\Image\Gd\Commands;
 
-use Intervention\Image\Commands\AbstractCommand;
-use Intervention\Image\Gd\Color;
+use \Intervention\Image\Gd\Color;
 
-class RotateCommand extends AbstractCommand
+class RotateCommand extends \Intervention\Image\Commands\AbstractCommand
 {
     /**
      * Rotates image counter clockwise
@@ -19,11 +18,10 @@ class RotateCommand extends AbstractCommand
         $color = $this->argument(1)->value();
         $color = new Color($color);
 
-        // restrict rotations beyond 360 degrees, since the end result is the same
-        $angle %= 360;
-
         // rotate image
-        $image->setCore(imagerotate($image->getCore(), $angle, $color->getInt()));
+        foreach ($image as $frame) {
+            $frame->setCore(imagerotate($frame->getCore(), $angle, $color->getInt()));
+        }
 
         return true;
     }

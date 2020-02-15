@@ -2,22 +2,21 @@
 
 namespace Intervention\Image;
 
-use Closure;
-use Intervention\Image\Exception\InvalidArgumentException;
+use \Closure;
 
 class Size
 {
     /**
      * Width
      *
-     * @var int
+     * @var integer
      */
     public $width;
 
     /**
      * Height
      *
-     * @var int
+     * @var integer
      */
     public $height;
 
@@ -31,9 +30,9 @@ class Size
     /**
      * Creates a new Size instance
      *
-     * @param int   $width
-     * @param int   $height
-     * @param Point $pivot
+     * @param integer $width
+     * @param integer $height
+     * @param Point   $pivot
      */
     public function __construct($width = null, $height = null, Point $pivot = null)
     {
@@ -45,8 +44,8 @@ class Size
     /**
      * Set the width and height absolutely
      *
-     * @param int $width
-     * @param int $height
+     * @param integer $width
+     * @param integer $height
      */
     public function set($width, $height)
     {
@@ -67,7 +66,7 @@ class Size
     /**
      * Get the current width
      *
-     * @return int
+     * @return integer
      */
     public function getWidth()
     {
@@ -77,7 +76,7 @@ class Size
     /**
      * Get the current height
      *
-     * @return int
+     * @return integer
      */
     public function getHeight()
     {
@@ -97,15 +96,15 @@ class Size
     /**
      * Resize to desired width and/or height
      *
-     * @param  int     $width
-     * @param  int     $height
+     * @param  integer $width
+     * @param  integer $height
      * @param  Closure $callback
      * @return Size
      */
     public function resize($width, $height, Closure $callback = null)
     {
         if (is_null($width) && is_null($height)) {
-            throw new InvalidArgumentException(
+            throw new \Intervention\Image\Exception\InvalidArgumentException(
                 "Width or height needs to be defined."
             );
         }
@@ -133,7 +132,7 @@ class Size
     /**
      * Scale size according to given constraints
      *
-     * @param  int     $width
+     * @param  integer $width
      * @param  Closure $callback
      * @return Size
      */
@@ -155,7 +154,7 @@ class Size
             }
 
             if ($constraint->isFixed(Constraint::ASPECTRATIO)) {
-                $h = max(1, intval(round($this->width / $constraint->getSize()->getRatio())));
+                $h = intval(round($this->width / $constraint->getSize()->getRatio()));
 
                 if ($constraint->isFixed(Constraint::UPSIZE)) {
                     $this->height = ($h > $max_height) ? $max_height : $h;
@@ -169,7 +168,7 @@ class Size
     /**
      * Scale size according to given constraints
      *
-     * @param  int     $height
+     * @param  integer $height
      * @param  Closure $callback
      * @return Size
      */
@@ -191,7 +190,7 @@ class Size
             }
 
             if ($constraint->isFixed(Constraint::ASPECTRATIO)) {
-                $w = max(1, intval(round($this->height * $constraint->getSize()->getRatio())));
+                $w = intval(round($this->height * $constraint->getSize()->getRatio()));
 
                 if ($constraint->isFixed(Constraint::UPSIZE)) {
                     $this->width = ($w > $max_width) ? $max_width : $w;
@@ -272,8 +271,8 @@ class Size
      * and moves point automatically by offset.
      *
      * @param  string  $position
-     * @param  int     $offset_x
-     * @param  int     $offset_y
+     * @param  integer $offset_x
+     * @param  integer $offset_y
      * @return \Intervention\Image\Size
      */
     public function align($position, $offset_x = 0, $offset_y = 0)
@@ -351,6 +350,82 @@ class Size
         }
 
         $this->pivot->setPosition($x, $y);
+
+        return $this;
+    }
+
+    /**
+     * Rotate rectangular size and return bounding rectangle
+     *
+     * @param  float $angle
+     * @return \Intervention\Image\Size
+     */
+    public function rotate($angle)
+    {
+        if ($angle != 0) {
+
+            // recreate rectangle with 4 points
+            $points = array(
+                new Point(0, 0),
+                new Point($this->width, 0),
+                new Point($this->width, $this->height * (-1)),
+                new Point(0, $this->height * (-1))
+            );
+
+            $x_values = array();
+            $y_values = array();
+
+            $pivot = clone $this->pivot;
+            $pivot->y = $pivot->y * (-1);
+            
+            // rotate 4 points
+            foreach ($points as $point) {
+                $point->rotate($angle, $pivot);
+                $x_values[] = $point->x;
+                $y_values[] = $point->y;
+            }
+
+            // find max/min x/y values
+            $max_x_value = max($x_values);
+            $max_y_value = max($y_values);
+            $min_x_value = min($x_values);
+            $min_y_value = min($y_values);
+
+            // set new bounding box
+            $this->set(
+                abs($min_x_value - $max_x_value),
+                abs($min_y_value - $max_y_value)
+            );
+
+            // set new pivot
+            $this->setPivot($pivot->setPosition(
+                abs($pivot->x + $min_x_value * (-1)), 
+                abs($pivot->y + $max_y_value * (-1))
+            ));
+        }
+        
+        return $this;
+    }
+
+    /**
+     * Resize rectangular and keeps pivot point relative
+     *
+     * @param  integer $width
+     * @param  integer $height
+     * @param  boolean $relative
+     * @return \Intervention\Image\Size
+     */
+    public function resizeCanvas($width, $height, $relative = false)
+    {
+        $width = $relative ? $this->width + $width * 2 : $width;
+        $height = $relative ? $this->height + $height * 2 : $height;
+
+        $px = $this->pivot->x == 0 ? 0 : $width / ($this->width / $this->pivot->x);
+        $py = $this->pivot->y == 0 ? 0 : $height / ($this->height / $this->pivot->y);
+
+        $this->width = $width;
+        $this->height = $height;
+        $this->setPivot(new Point($px, $py));
 
         return $this;
     }

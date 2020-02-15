@@ -2,9 +2,7 @@
 
 namespace Intervention\Image\Imagick\Commands;
 
-use Intervention\Image\Commands\AbstractCommand;
-
-class ResizeCommand extends AbstractCommand
+class ResizeCommand extends \Intervention\Image\Commands\AbstractCommand
 {
     /**
      * Resizes image dimensions
@@ -22,7 +20,9 @@ class ResizeCommand extends AbstractCommand
         $resized = $image->getSize()->resize($width, $height, $constraints);
 
         // modify image
-        $image->getCore()->scaleImage($resized->getWidth(), $resized->getHeight());
+        foreach ($image as $frame) {
+            $frame->getCore()->resizeImage($resized->getWidth(), $resized->getHeight(), \Imagick::FILTER_BOX, 1);
+        }
 
         return true;
     }

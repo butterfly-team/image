@@ -2,10 +2,9 @@
 
 namespace Intervention\Image\Imagick\Commands;
 
-use Intervention\Image\Commands\AbstractCommand;
-use Intervention\Image\Size;
+use \Intervention\Image\Size;
 
-class FitCommand extends AbstractCommand
+class FitCommand extends \Intervention\Image\Commands\AbstractCommand
 {
     /**
      * Crops and resized an image at the same time
@@ -25,17 +24,20 @@ class FitCommand extends AbstractCommand
         $resized = clone $cropped;
         $resized = $resized->resize($width, $height, $constraints);
 
-        // crop image
-        $image->getCore()->cropImage(
-            $cropped->width,
-            $cropped->height,
-            $cropped->pivot->x,
-            $cropped->pivot->y
-        );
+        foreach ($image as $frame) {
 
-        // resize image
-        $image->getCore()->scaleImage($resized->getWidth(), $resized->getHeight());
-        $image->getCore()->setImagePage(0,0,0,0);
+            // crop image
+            $frame->getCore()->cropImage(
+                $cropped->width,
+                $cropped->height,
+                $cropped->pivot->x,
+                $cropped->pivot->y
+            );
+
+            // resize image
+            $frame->getCore()->resizeImage($resized->getWidth(), $resized->getHeight(), \Imagick::FILTER_BOX, 1);
+            $frame->getCore()->setImagePage(0,0,0,0);
+        }
 
         return true;
     }

@@ -2,8 +2,6 @@
 
 namespace Intervention\Image;
 
-use Intervention\Image\Exception\NotSupportedException;
-
 abstract class AbstractDriver
 {
     /**
@@ -23,8 +21,8 @@ abstract class AbstractDriver
     /**
      * Creates new image instance
      *
-     * @param  int     $width
-     * @param  int     $height
+     * @param  integer $width
+     * @param  integer $height
      * @param  string  $background
      * @return \Intervention\Image\Image
      */
@@ -39,20 +37,20 @@ abstract class AbstractDriver
     abstract public function parseColor($value);
 
     /**
-     * Checks if core module installation is available
+     * Checks if image module installation is available
      *
      * @return boolean
      */
-    abstract protected function coreAvailable();
+    abstract protected function moduleAvailable();
 
     /**
-     * Returns clone of given core
+     * Returns clone of given container
      *
      * @return mixed
      */
-    public function cloneCore($core)
+    public function cloneContainer(ContainerInterface $container)
     {
-        return clone $core;
+        return clone $container;
     }
 
     /**
@@ -71,7 +69,7 @@ abstract class AbstractDriver
      *
      * @param  Image   $image
      * @param  string  $format
-     * @param  int     $quality
+     * @param  integer $quality
      * @return \Intervention\Image\Image
      */
     public function encode($image, $format, $quality)
@@ -104,8 +102,6 @@ abstract class AbstractDriver
      */
     private function getCommandClassName($name)
     {
-        $name = mb_convert_case($name[0], MB_CASE_UPPER, 'utf-8') . mb_substr($name, 1, mb_strlen($name));
-        
         $drivername = $this->getDriverName();
         $classnameLocal = sprintf('\Intervention\Image\%s\Commands\%sCommand', $drivername, ucfirst($name));
         $classnameGlobal = sprintf('\Intervention\Image\Commands\%sCommand', ucfirst($name));
@@ -116,7 +112,7 @@ abstract class AbstractDriver
             return $classnameGlobal;
         }
 
-        throw new NotSupportedException(
+        throw new \Intervention\Image\Exception\NotSupportedException(
             "Command ({$name}) is not available for driver ({$drivername})."
         );
     }

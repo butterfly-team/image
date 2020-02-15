@@ -2,9 +2,7 @@
 
 namespace Intervention\Image\Gd\Commands;
 
-use Intervention\Image\Commands\AbstractCommand;
-
-class InvertCommand extends AbstractCommand
+class InvertCommand extends \Intervention\Image\Commands\AbstractCommand
 {
     /**
      * Inverts colors of an image
@@ -14,6 +12,10 @@ class InvertCommand extends AbstractCommand
      */
     public function execute($image)
     {
-        return imagefilter($image->getCore(), IMG_FILTER_NEGATE);
+        foreach ($image as $frame) {
+            imagefilter($frame->getCore(), IMG_FILTER_NEGATE);
+        }
+
+        return true;
     }
 }

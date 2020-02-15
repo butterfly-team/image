@@ -2,9 +2,7 @@
 
 namespace Intervention\Image\Imagick\Commands;
 
-use Intervention\Image\Commands\AbstractCommand;
-
-class InvertCommand extends AbstractCommand
+class InvertCommand extends \Intervention\Image\Commands\AbstractCommand
 {
     /**
      * Inverts colors of an image
@@ -14,6 +12,10 @@ class InvertCommand extends AbstractCommand
      */
     public function execute($image)
     {
-        return $image->getCore()->negateImage(false);
+        foreach ($image as $frame) {
+            $frame->getCore()->negateImage(false);
+        }
+        
+        return true;
     }
 }

@@ -2,21 +2,21 @@
 
 namespace Intervention\Image\Gd\Shapes;
 
-use Intervention\Image\Image;
+use \Intervention\Image\Image;
 
 class CircleShape extends EllipseShape
 {
     /**
      * Diameter of circle in pixels
      *
-     * @var int
+     * @var integer
      */
     public $diameter = 100;
 
     /**
      * Create new instance of circle
      *
-     * @param int $diameter
+     * @param integer $diameter
      */
     public function __construct($diameter = null)
     {
@@ -29,8 +29,8 @@ class CircleShape extends EllipseShape
      * Draw current circle on given image
      *
      * @param  Image   $image
-     * @param  int     $x
-     * @param  int     $y
+     * @param  integer $x
+     * @param  integer $y
      * @return boolean
      */
     public function applyToImage(Image $image, $x = 0, $y = 0)

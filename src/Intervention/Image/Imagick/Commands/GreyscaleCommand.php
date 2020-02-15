@@ -2,9 +2,7 @@
 
 namespace Intervention\Image\Imagick\Commands;
 
-use Intervention\Image\Commands\AbstractCommand;
-
-class GreyscaleCommand extends AbstractCommand
+class GreyscaleCommand extends \Intervention\Image\Commands\AbstractCommand
 {
     /**
      * Turns an image into a greyscale version
@@ -14,6 +12,10 @@ class GreyscaleCommand extends AbstractCommand
      */
     public function execute($image)
     {
-        return $image->getCore()->modulateImage(100, 0, 100);
+        foreach ($image as $frame) {
+            $frame->getCore()->modulateImage(100, 0, 100);
+        }
+
+        return true;
     }
 }

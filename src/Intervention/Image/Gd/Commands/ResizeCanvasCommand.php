@@ -2,9 +2,10 @@
 
 namespace Intervention\Image\Gd\Commands;
 
-use Intervention\Image\Commands\AbstractCommand;
+use \Intervention\Image\Point;
+use \Intervention\Image\Size;
 
-class ResizeCanvasCommand extends AbstractCommand
+class ResizeCanvasCommand extends \Intervention\Image\Commands\AbstractCommand
 {
     /**
      * Resizes image boundaries
@@ -17,7 +18,7 @@ class ResizeCanvasCommand extends AbstractCommand
         $width = $this->argument(0)->type('digit')->required()->value();
         $height = $this->argument(1)->type('digit')->required()->value();
         $anchor = $this->argument(2)->value('center');
-        $relative = $this->argument(3)->type('boolean')->value(false);
+        $relative = $this->argument(3)->type('boolean')->value();
         $bgcolor = $this->argument(4)->value();
 
         $original_width = $image->getWidth();

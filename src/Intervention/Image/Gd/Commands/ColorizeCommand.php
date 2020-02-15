@@ -2,9 +2,7 @@
 
 namespace Intervention\Image\Gd\Commands;
 
-use Intervention\Image\Commands\AbstractCommand;
-
-class ColorizeCommand extends AbstractCommand
+class ColorizeCommand extends \Intervention\Image\Commands\AbstractCommand
 {
     /**
      * Changes balance of different RGB color channels
@@ -24,6 +22,10 @@ class ColorizeCommand extends AbstractCommand
         $blue = round($blue * 2.55);
 
         // apply filter
-        return imagefilter($image->getCore(), IMG_FILTER_COLORIZE, $red, $green, $blue);
+        foreach ($image as $frame) {
+            imagefilter($frame->getCore(), IMG_FILTER_COLORIZE, $red, $green, $blue);
+        }
+        
+        return true;
     }
 }

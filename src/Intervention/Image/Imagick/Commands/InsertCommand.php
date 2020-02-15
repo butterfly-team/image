@@ -2,9 +2,7 @@
 
 namespace Intervention\Image\Imagick\Commands;
 
-use Intervention\Image\Commands\AbstractCommand;
-
-class InsertCommand extends AbstractCommand
+class InsertCommand extends \Intervention\Image\Commands\AbstractCommand
 {
     /**
      * Insert another image into given image
@@ -28,6 +26,15 @@ class InsertCommand extends AbstractCommand
         $target = $image_size->relativePosition($watermark_size);
 
         // insert image at position
-        return $image->getCore()->compositeImage($watermark->getCore(), \Imagick::COMPOSITE_DEFAULT, $target->x, $target->y);
+        foreach ($image as $frame) {
+            $frame->getCore()->compositeImage(
+                $watermark->getCore(),
+                \Imagick::COMPOSITE_DEFAULT,
+                $target->x,
+                $target->y
+            );
+        }
+
+        return true;
     }
 }

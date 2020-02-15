@@ -2,9 +2,7 @@
 
 namespace Intervention\Image\Gd\Commands;
 
-use Intervention\Image\Commands\AbstractCommand;
-
-class PixelateCommand extends AbstractCommand
+class PixelateCommand extends \Intervention\Image\Commands\AbstractCommand
 {
     /**
      * Applies a pixelation effect to a given image
@@ -16,6 +14,10 @@ class PixelateCommand extends AbstractCommand
     {
         $size = $this->argument(0)->type('digit')->value(10);
 
-        return imagefilter($image->getCore(), IMG_FILTER_PIXELATE, $size, true);
+        foreach ($image as $frame) {
+            imagefilter($frame->getCore(), IMG_FILTER_PIXELATE, $size, true);
+        }
+
+        return true;
     }
 }

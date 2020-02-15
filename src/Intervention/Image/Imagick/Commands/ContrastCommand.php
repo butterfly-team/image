@@ -2,9 +2,7 @@
 
 namespace Intervention\Image\Imagick\Commands;
 
-use Intervention\Image\Commands\AbstractCommand;
-
-class ContrastCommand extends AbstractCommand
+class ContrastCommand extends \Intervention\Image\Commands\AbstractCommand
 {
     /**
      * Changes contrast of image
@@ -16,6 +14,10 @@ class ContrastCommand extends AbstractCommand
     {
         $level = $this->argument(0)->between(-100, 100)->required()->value();
 
-        return $image->getCore()->sigmoidalContrastImage($level > 0, $level / 4, 0);
+        foreach ($image as $frame) {
+            $frame->getCore()->sigmoidalContrastImage($level > 0, $level / 4, 0);
+        }
+
+        return true;
     }
 }

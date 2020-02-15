@@ -5,6 +5,11 @@ namespace Intervention\Image;
 abstract class AbstractFont
 {
     /**
+     * Security padding to prevent text being cut off
+     */
+    const PADDING = 10;
+
+    /**
      * Text to be written
      *
      * @var String
@@ -14,7 +19,7 @@ abstract class AbstractFont
     /**
      * Text size in pixels
      *
-     * @var int
+     * @var integer
      */
     public $size = 12;
 
@@ -28,7 +33,7 @@ abstract class AbstractFont
     /**
      * Rotation angle of the text
      *
-     * @var int
+     * @var integer
      */
     public $angle = 0;
 
@@ -54,21 +59,44 @@ abstract class AbstractFont
     public $file;
 
     /**
+     * Line height of the text
+     *
+     * @var float
+     */
+    public $lineHeight = 1;
+
+    /**
+     * Textbox
+     *
+     * @var Size
+     */
+    public $box;
+
+    /**
      * Draws font to given image on given position
      *
      * @param  Image   $image
-     * @param  int     $posx
-     * @param  int     $posy
+     * @param  integer $posx
+     * @param  integer $posy
      * @return boolean
      */
     abstract public function applyToImage(Image $image, $posx = 0, $posy = 0);
-    
+
     /**
-     * Calculates bounding box of current font setting
+     * Calculate boxsize including own features
      *
-     * @return array
+     * @param  string $text
+     * @return \Intervention\Image\Size
      */
-    abstract public function getBoxSize();
+    abstract public function getBoxSize($text = null);
+
+    /**
+     * Get raw boxsize without any non-core features
+     *
+     * @param  string $text
+     * @return \Intervention\Image\Size
+     */
+    abstract protected function getCoreBoxSize($text = null);
 
     /**
      * Create a new instance of Font
@@ -89,8 +117,6 @@ abstract class AbstractFont
     public function text($text)
     {
         $this->text = $text;
-
-        return $this;
     }
 
     /**
@@ -106,20 +132,18 @@ abstract class AbstractFont
     /**
      * Set font size in pixels
      *
-     * @param  int $size
+     * @param  integer $size
      * @return void
      */
     public function size($size)
     {
         $this->size = $size;
-
-        return $this;
     }
 
     /**
      * Get font size in pixels
      *
-     * @return int
+     * @return integer
      */
     public function getSize()
     {
@@ -135,8 +159,6 @@ abstract class AbstractFont
     public function color($color)
     {
         $this->color = $color;
-
-        return $this;
     }
 
     /**
@@ -152,20 +174,18 @@ abstract class AbstractFont
     /**
      * Set rotation angle of text
      *
-     * @param  int $angle
+     * @param  integer $angle
      * @return void
      */
     public function angle($angle)
     {
         $this->angle = $angle;
-
-        return $this;
     }
 
     /**
      * Get rotation angle of text
      *
-     * @return int
+     * @return integer
      */
     public function getAngle()
     {
@@ -181,8 +201,6 @@ abstract class AbstractFont
     public function align($align)
     {
         $this->align = $align;
-
-        return $this;
     }
 
     /**
@@ -204,8 +222,6 @@ abstract class AbstractFont
     public function valign($valign)
     {
         $this->valign = $valign;
-
-        return $this;
     }
 
     /**
@@ -221,14 +237,12 @@ abstract class AbstractFont
     /**
      * Set path to font file
      *
-     * @param  string $file
+     * @param  string $align
      * @return void
      */
     public function file($file)
     {
         $this->file = $file;
-
-        return $this;
     }
 
     /**
@@ -239,6 +253,49 @@ abstract class AbstractFont
     public function getFile()
     {
         return $this->file;
+    }
+
+    /**
+     * Set line-height
+     *
+     * @param  float $height
+     * @return void
+     */
+    public function lineHeight($lineHeight)
+    {
+        $this->lineHeight = $lineHeight;
+    }
+
+    /**
+     * Get line-height of instance
+     *
+     * @return float
+     */
+    public function getLineHeight()
+    {
+        return $this->lineHeight;
+    }
+
+    /**
+     * Set size of boxed text
+     *
+     * @param  integer $width
+     * @param  integer $height
+     * @return void
+     */
+    public function box($width, $height)
+    {
+        $this->box = new Size($width, $height);
+    }
+
+    /**
+     * Get width of textbox
+     *
+     * @return integer
+     */
+    public function getBox()
+    {
+        return $this->box;
     }
 
     /**
@@ -258,10 +315,74 @@ abstract class AbstractFont
     /**
      * Counts lines of text to be written
      *
-     * @return int
+     * @return integer
      */
     public function countLines()
     {
-        return count(explode(PHP_EOL, $this->text));
+        return count($this->getLines());
+    }
+
+    /**
+     * Get array of lines to be written
+     *
+     * @return array
+     */
+    public function getLines($text = null)
+    {
+        $text = is_null($text) ? $this->text : $text;
+
+        return explode(PHP_EOL, $text);
+    }
+
+    /**
+     * Get array of words to be written
+     *
+     * @return array
+     */
+    public function getWords()
+    {
+        return explode(' ', $this->text);
+    }
+
+    /**
+     * Determines if text has defined box size
+     *
+     * @return boolean
+     */
+    protected function isBoxed()
+    {
+        return is_a($this->box, 'Intervention\Image\Size');
+    }
+
+    /**
+     * Returns formated text according to box settings
+     *
+     * @return string
+     */
+    protected function format()
+    {
+        if ($this->isBoxed()) {
+
+            $line = array();
+            $lines = array();
+
+            foreach ($this->getWords() as $word) {
+                
+                $linesize = $this->getCoreBoxSize(
+                    implode(' ', array_merge($line, array(trim($word))))
+                );
+
+                if ($linesize->getWidth() <= $this->box->getWidth()) {
+                    $line[] = trim($word);
+                } else {
+                    $lines[] = implode(' ', $line);
+                    $line = array(trim($word));
+                }
+            }
+
+            $lines[] = trim(implode(' ', $line));
+
+            return implode(PHP_EOL, $lines);
+        }
     }
 }

@@ -2,11 +2,10 @@
 
 namespace Intervention\Image\Imagick\Shapes;
 
-use Intervention\Image\AbstractShape;
-use Intervention\Image\Image;
-use Intervention\Image\Imagick\Color;
+use \Intervention\Image\Image;
+use \Intervention\Image\Imagick\Color;
 
-class PolygonShape extends AbstractShape
+class PolygonShape extends \Intervention\Image\AbstractShape
 {
     /**
      * Array of points of polygon
@@ -29,8 +28,8 @@ class PolygonShape extends AbstractShape
      * Draw polygon on given image
      *
      * @param  Image   $image
-     * @param  int     $x
-     * @param  int     $y
+     * @param  integer $x
+     * @param  integer $y
      * @return boolean
      */
     public function applyToImage(Image $image, $x = 0, $y = 0)
@@ -50,7 +49,9 @@ class PolygonShape extends AbstractShape
 
         $polygon->polygon($this->points);
 
-        $image->getCore()->drawImage($polygon);
+        foreach ($image as $frame) {
+            $frame->getCore()->drawImage($polygon);
+        }
 
         return true;
     }
@@ -63,13 +64,13 @@ class PolygonShape extends AbstractShape
      */
     private function formatPoints($points)
     {
-        $ipoints = [];
+        $ipoints = array();
         $count = 1;
 
         foreach ($points as $key => $value) {
             if ($count%2 === 0) {
                 $y = $value;
-                $ipoints[] = ['x' => $x, 'y' => $y];
+                $ipoints[] = array('x' => $x, 'y' => $y);
             } else {
                 $x = $value;
             }

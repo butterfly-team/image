@@ -2,9 +2,6 @@
 
 namespace Intervention\Image;
 
-use Illuminate\Support\Facades\Response as IlluminateResponse;
-use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
-
 class Response
 {
     /**
@@ -24,7 +21,7 @@ class Response
     /**
      * Quality of displayed image
      *
-     * @var int
+     * @var integer
      */
     public $quality;
 
@@ -33,7 +30,7 @@ class Response
      *
      * @param Image   $image
      * @param string  $format
-     * @param int     $quality
+     * @param integer $quality
      */
     public function __construct(Image $image, $format = null, $quality = null)
     {
@@ -56,15 +53,9 @@ class Response
 
         if (function_exists('app') && is_a($app = app(), 'Illuminate\Foundation\Application')) {
 
-            $response = IlluminateResponse::make($data);
+            $response = \Response::make($data);
             $response->header('Content-Type', $mime);
             $response->header('Content-Length', $length);
-
-        } elseif (class_exists('\Symfony\Component\HttpFoundation\Response')) {
-
-            $response = SymfonyResponse::create($data);
-            $response->headers->set('Content-Type', $mime);
-            $response->headers->set('Content-Length', $length);
 
         } else {
 

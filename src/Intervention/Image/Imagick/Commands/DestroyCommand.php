@@ -2,9 +2,7 @@
 
 namespace Intervention\Image\Imagick\Commands;
 
-use Intervention\Image\Commands\AbstractCommand;
-
-class DestroyCommand extends AbstractCommand
+class DestroyCommand extends \Intervention\Image\Commands\AbstractCommand
 {
     /**
      * Destroys current image core and frees up memory
@@ -17,7 +15,7 @@ class DestroyCommand extends AbstractCommand
         // destroy image core
         $image->getCore()->clear();
 
-        // destroy backups
+        // destroy backups    
         foreach ($image->getBackups() as $backup) {
             $backup->clear();
         }

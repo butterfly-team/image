@@ -2,11 +2,9 @@
 
 namespace Intervention\Image\Imagick;
 
-use Intervention\Image\AbstractDriver;
-use Intervention\Image\Exception\NotSupportedException;
-use Intervention\Image\Image;
+use \Intervention\Image\Size;
 
-class Driver extends AbstractDriver
+class Driver extends \Intervention\Image\AbstractDriver
 {
     /**
      * Creates new instance of driver
@@ -16,8 +14,8 @@ class Driver extends AbstractDriver
      */
     public function __construct(Decoder $decoder = null, Encoder $encoder = null)
     {
-        if ( ! $this->coreAvailable()) {
-            throw new NotSupportedException(
+        if ( ! $this->moduleAvailable()) {
+            throw new \Intervention\Image\Exception\NotSupportedException(
                 "ImageMagick module not available with this PHP installation."
             );
         }
@@ -29,9 +27,9 @@ class Driver extends AbstractDriver
     /**
      * Creates new image instance
      *
-     * @param  int     $width
-     * @param  int     $height
-     * @param  mixed   $background
+     * @param  integer $width
+     * @param  integer $height
+     * @param  string  $background
      * @return \Intervention\Image\Image
      */
     public function newImage($width, $height, $background = null)
@@ -42,11 +40,11 @@ class Driver extends AbstractDriver
         $core = new \Imagick;
         $core->newImage($width, $height, $background->getPixel(), 'png');
         $core->setType(\Imagick::IMGTYPE_UNDEFINED);
-        $core->setImageType(\Imagick::IMGTYPE_UNDEFINED);
+        $core->setImagetype(\Imagick::IMGTYPE_UNDEFINED);
         $core->setColorspace(\Imagick::COLORSPACE_UNDEFINED);
 
         // build image
-        $image = new Image(new static, $core);
+        $image = new \Intervention\Image\Image(new self, new Container($core));
 
         return $image;
     }
@@ -63,11 +61,11 @@ class Driver extends AbstractDriver
     }
 
     /**
-     * Checks if core module installation is available
+     * Checks if image module installation is available
      *
      * @return boolean
      */
-    protected function coreAvailable()
+    protected function moduleAvailable()
     {
         return (extension_loaded('imagick') && class_exists('Imagick'));
     }

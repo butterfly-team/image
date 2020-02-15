@@ -2,12 +2,10 @@
 
 namespace Intervention\Image\Imagick;
 
-use Intervention\Image\AbstractDecoder;
-use Intervention\Image\Exception\NotReadableException;
-use Intervention\Image\Exception\NotSupportedException;
-use Intervention\Image\Image;
+use \Intervention\Image\Image;
+use \Intervention\Image\Size;
 
-class Decoder extends AbstractDecoder
+class Decoder extends \Intervention\Image\AbstractDecoder
 {
     /**
      * Initiates new image from path in filesystem
@@ -17,24 +15,21 @@ class Decoder extends AbstractDecoder
      */
     public function initFromPath($path)
     {
-        $core = new \Imagick;
+        $imagick = new \Imagick;
 
         try {
 
-            $core->setBackgroundColor(new \ImagickPixel('transparent'));
-            $core->readImage($path);
-            $core->setImageType(defined('\Imagick::IMGTYPE_TRUECOLORALPHA') ? \Imagick::IMGTYPE_TRUECOLORALPHA : \Imagick::IMGTYPE_TRUECOLORMATTE);
+            $imagick->readImage($path);
+            $imagick->setImageType(\Imagick::IMGTYPE_TRUECOLORMATTE);
 
         } catch (\ImagickException $e) {
             throw new \Intervention\Image\Exception\NotReadableException(
-                "Unable to read image from path ({$path}).",
-                0,
-                $e
+                "Unable to read image from path ({$path})."
             );
         }
 
         // build image
-        $image = $this->initFromImagick($core);
+        $image = $this->initFromImagick($imagick);
         $image->setFileInfoFromPath($path);
 
         return $image;
@@ -48,7 +43,7 @@ class Decoder extends AbstractDecoder
      */
     public function initFromGdResource($resource)
     {
-        throw new NotSupportedException(
+        throw new \Intervention\Image\Exception\NotSupportedException(
             'Imagick driver is unable to init from GD resource.'
         );
     }
@@ -56,19 +51,18 @@ class Decoder extends AbstractDecoder
     /**
      * Initiates new image from Imagick object
      *
-     * @param  Imagick $object
+     * @param  Imagick $imagick
      * @return \Intervention\Image\Image
      */
-    public function initFromImagick(\Imagick $object)
+    public function initFromImagick(\Imagick $imagick)
     {
-        // currently animations are not supported
-        // so all images are turned into static
-        $object = $this->removeAnimation($object);
-
         // reset image orientation
-        $object->setImageOrientation(\Imagick::ORIENTATION_UNDEFINED);
+        $imagick->setImageOrientation(\Imagick::ORIENTATION_UNDEFINED);
 
-        return new Image(new Driver, $object);
+        // coalesce possible animation
+        $imagick = $imagick->coalesceImages();
+
+        return new Image(new Driver, new Container($imagick));
     }
 
     /**
@@ -79,23 +73,20 @@ class Decoder extends AbstractDecoder
      */
     public function initFromBinary($binary)
     {
-        $core = new \Imagick;
+        $imagick = new \Imagick;
 
         try {
-            $core->setBackgroundColor(new \ImagickPixel('transparent'));
 
-            $core->readImageBlob($binary);
+            $imagick->readImageBlob($binary);
 
         } catch (\ImagickException $e) {
-            throw new NotReadableException(
-                "Unable to read image from binary data.",
-                0,
-                $e
+            throw new \Intervention\Image\Exception\NotReadableException(
+                "Unable to read image from binary data."
             );
         }
 
         // build image
-        $image = $this->initFromImagick($core);
+        $image = $this->initFromImagick($imagick);
         $image->mime = finfo_buffer(finfo_open(FILEINFO_MIME_TYPE), $binary);
 
         return $image;

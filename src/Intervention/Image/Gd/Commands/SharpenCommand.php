@@ -2,9 +2,7 @@
 
 namespace Intervention\Image\Gd\Commands;
 
-use Intervention\Image\Commands\AbstractCommand;
-
-class SharpenCommand extends AbstractCommand
+class SharpenCommand extends \Intervention\Image\Commands\AbstractCommand
 {
     /**
      * Sharpen image
@@ -22,13 +20,17 @@ class SharpenCommand extends AbstractCommand
         $abs = ((4 * $min + 4 * $max) * -1) + 1;
         $div = 1;
 
-        $matrix = [
-            [$min, $max, $min],
-            [$max, $abs, $max],
-            [$min, $max, $min]
-        ];
+        $matrix = array(
+            array($min, $max, $min),
+            array($max, $abs, $max),
+            array($min, $max, $min)
+        );
 
         // apply the matrix
-        return imageconvolution($image->getCore(), $matrix, $div, 0);
+        foreach ($image as $frame) {
+            imageconvolution($frame->getCore(), $matrix, $div, 0);
+        }
+
+        return true;
     }
 }

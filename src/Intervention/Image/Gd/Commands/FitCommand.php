@@ -2,7 +2,8 @@
 
 namespace Intervention\Image\Gd\Commands;
 
-use Intervention\Image\Size;
+use \Intervention\Image\Point;
+use \Intervention\Image\Size;
 
 class FitCommand extends ResizeCommand
 {
@@ -25,7 +26,16 @@ class FitCommand extends ResizeCommand
         $resized = $resized->resize($width, $height, $constraints);
 
         // modify image
-        $this->modify($image, 0, 0, $cropped->pivot->x, $cropped->pivot->y, $resized->getWidth(), $resized->getHeight(), $cropped->getWidth(), $cropped->getHeight());
+        $this->modify($image,
+            0,
+            0,
+            $cropped->pivot->x,
+            $cropped->pivot->y,
+            $resized->getWidth(),
+            $resized->getHeight(),
+            $cropped->getWidth(),
+            $cropped->getHeight()
+        );
 
         return true;
     }

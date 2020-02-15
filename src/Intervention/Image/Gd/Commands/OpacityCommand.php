@@ -2,9 +2,7 @@
 
 namespace Intervention\Image\Gd\Commands;
 
-use Intervention\Image\Commands\AbstractCommand;
-
-class OpacityCommand extends AbstractCommand
+class OpacityCommand extends \Intervention\Image\Commands\AbstractCommand
 {
     /**
      * Defines opacity of an image
@@ -20,7 +18,7 @@ class OpacityCommand extends AbstractCommand
         $size = $image->getSize();
 
         // build temp alpha mask
-        $mask_color = sprintf('rgba(0, 0, 0, %.1F)', $transparency / 100);
+        $mask_color = sprintf('rgba(0, 0, 0, %.1f)', $transparency / 100);
         $mask = $image->getDriver()->newImage($size->width, $size->height, $mask_color);
 
         // mask image

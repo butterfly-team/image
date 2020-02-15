@@ -2,9 +2,7 @@
 
 namespace Intervention\Image\Imagick\Commands;
 
-use Intervention\Image\Commands\AbstractCommand;
-
-class SharpenCommand extends AbstractCommand
+class SharpenCommand extends \Intervention\Image\Commands\AbstractCommand
 {
     /**
      * Sharpen image
@@ -16,6 +14,10 @@ class SharpenCommand extends AbstractCommand
     {
         $amount = $this->argument(0)->between(0, 100)->value(10);
 
-        return $image->getCore()->unsharpMaskImage(1, 1, $amount / 6.25, 0);
+        foreach ($image as $frame) {
+            $frame->getCore()->unsharpMaskImage(1, 1, $amount / 6.25, 0);
+        }
+
+        return true;
     }
 }

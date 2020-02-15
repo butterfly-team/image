@@ -2,9 +2,7 @@
 
 namespace Intervention\Image\Gd\Commands;
 
-use Intervention\Image\Commands\AbstractCommand;
-
-class BackupCommand extends AbstractCommand
+class BackupCommand extends \Intervention\Image\Commands\AbstractCommand
 {
     /**
      * Saves a backups of current state of image core
@@ -17,8 +15,13 @@ class BackupCommand extends AbstractCommand
         $backupName = $this->argument(0)->value();
 
         // clone current image resource
-        $clone = clone $image;
-        $image->setBackup($clone->getCore(), $backupName);
+        $size = $image->getSize();
+        $clone = imagecreatetruecolor($size->width, $size->height);
+        imagealphablending($clone, false);
+        imagesavealpha($clone, true);
+        imagecopy($clone, $image->getCore(), 0, 0, 0, 0, $size->width, $size->height);
+
+        $image->setBackup($clone, $backupName);
 
         return true;
     }

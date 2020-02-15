@@ -2,8 +2,6 @@
 
 namespace Intervention\Image\Commands;
 
-use Intervention\Image\Commands\Argument;
-
 abstract class AbstractCommand
 {
     /**
@@ -41,12 +39,12 @@ abstract class AbstractCommand
     /**
      * Creates new argument instance from given argument key
      *
-     * @param  int $key
+     * @param  integer $key
      * @return \Intervention\Image\Commands\Argument
      */
     public function argument($key)
     {
-        return new Argument($this, $key);
+        return new \Intervention\Image\Commands\Argument($this, $key);
     }
 
     /**

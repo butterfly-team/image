@@ -2,9 +2,7 @@
 
 namespace Intervention\Image\Imagick\Commands;
 
-use Intervention\Image\Commands\AbstractCommand;
-
-class GammaCommand extends AbstractCommand
+class GammaCommand extends \Intervention\Image\Commands\AbstractCommand
 {
     /**
      * Applies gamma correction to a given image
@@ -16,6 +14,10 @@ class GammaCommand extends AbstractCommand
     {
         $gamma = $this->argument(0)->type('numeric')->required()->value();
 
-        return $image->getCore()->gammaImage($gamma);
+        foreach ($image as $frame) {
+            $frame->getCore()->gammaImage($gamma);
+        }
+
+        return true;
     }
 }

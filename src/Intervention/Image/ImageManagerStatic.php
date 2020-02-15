@@ -40,7 +40,7 @@ class ImageManagerStatic
      *
      * @return ImageManager
      */
-    public static function configure(array $config = [])
+    public static function configure(array $config = array())
     {
         return self::$manager = self::getManager()->configure($config);
     }
@@ -51,7 +51,6 @@ class ImageManagerStatic
      * @param  mixed $data
      *
      * @return \Intervention\Image\Image
-     * @throws \Intervention\Image\Exception\NotReadableException
      */
     public static function make($data)
     {
@@ -61,8 +60,8 @@ class ImageManagerStatic
     /**
      * Statically creates an empty image canvas
      *
-     * @param  int   $width
-     * @param  int   $height
+     * @param  integer $width
+     * @param  integer $height
      * @param  mixed $background
      *
      * @return \Intervention\Image\Image
@@ -73,10 +72,25 @@ class ImageManagerStatic
     }
 
     /**
+     * Creates a new animation
+     *
+     * @param  integer  $width
+     * @param  integer  $height
+     * @param  \Closure $callback
+     * @param  integer  $loops
+     *
+     * @return \Intervention\Image\Image
+     */
+    public static function animate($width, $height, $callback = null, $loops = null)
+    {
+        return self::getManager()->animate($width, $height, $callback, $loops);
+    }
+
+    /**
      * Create new cached image and run callback statically
      *
      * @param  Closure  $callback
-     * @param  int      $lifetime
+     * @param  integer  $lifetime
      * @param  boolean  $returnObj
      *
      * @return mixed

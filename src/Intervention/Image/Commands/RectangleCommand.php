@@ -2,9 +2,9 @@
 
 namespace Intervention\Image\Commands;
 
-use Closure;
+use \Closure;
 
-class RectangleCommand extends AbstractCommand
+class RectangleCommand extends \Intervention\Image\Commands\AbstractCommand
 {
     /**
      * Draws rectangle on given image

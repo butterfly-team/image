@@ -2,10 +2,9 @@
 
 namespace Intervention\Image\Gd\Commands;
 
-use Intervention\Image\Commands\AbstractCommand;
-use Intervention\Image\Gd\Color;
+use \Intervention\Image\Gd\Color;
 
-class PixelCommand extends AbstractCommand
+class PixelCommand extends \Intervention\Image\Commands\AbstractCommand
 {
     /**
      * Draws one pixel to a given image
@@ -20,6 +19,10 @@ class PixelCommand extends AbstractCommand
         $x = $this->argument(1)->type('digit')->required()->value();
         $y = $this->argument(2)->type('digit')->required()->value();
 
-        return imagesetpixel($image->getCore(), $x, $y, $color->getInt());
+        foreach ($image as $frame) {
+            imagesetpixel($frame->getCore(), $x, $y, $color->getInt());
+        }
+
+        return true;
     }
 }

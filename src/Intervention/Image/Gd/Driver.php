@@ -2,8 +2,9 @@
 
 namespace Intervention\Image\Gd;
 
-use Intervention\Image\Exception\NotSupportedException;
-use Intervention\Image\Image;
+use \Intervention\Image\ContainerInterface;
+use \Intervention\Image\Size;
+use \Intervention\Image\Frame;
 
 class Driver extends \Intervention\Image\AbstractDriver
 {
@@ -15,8 +16,8 @@ class Driver extends \Intervention\Image\AbstractDriver
      */
     public function __construct(Decoder $decoder = null, Encoder $encoder = null)
     {
-        if ( ! $this->coreAvailable()) {
-            throw new NotSupportedException(
+        if ( ! $this->moduleAvailable()) {
+            throw new \Intervention\Image\Exception\NotSupportedException(
                 "GD Library extension not available with this PHP installation."
             );
         }
@@ -28,20 +29,54 @@ class Driver extends \Intervention\Image\AbstractDriver
     /**
      * Creates new image instance
      *
-     * @param  int     $width
-     * @param  int     $height
-     * @param  mixed   $background
+     * @param  integer $width
+     * @param  integer $height
+     * @param  string  $background
      * @return \Intervention\Image\Image
      */
     public function newImage($width, $height, $background = null)
     {
         // create empty resource
         $core = imagecreatetruecolor($width, $height);
-        $image = new Image(new static, $core);
+        $image = new \Intervention\Image\Image(new self, $this->newContainer($core));
 
         // set background color
         $background = new Color($background);
         imagefill($image->getCore(), 0, 0, $background->getInt());
+
+        return $image;
+    }
+
+    /**
+     * Creates a new animation image instance
+     *
+     * @param  integer  $width
+     * @param  integer  $height
+     * @param  \Closure $callback
+     * @param  integer  $loops
+     *
+     * @return \Intervention\Image\Image
+     */
+    public function newAnimation($width, $height, $callback = null, $loops = null)
+    {
+        // create container
+        $container = new Container;
+        $container->setLoops($loops);
+
+        // create empty canvas
+        $canvas = $this->newImage($width, $height)->getCore();
+
+        // build frames from callback
+        if (is_callable($callback)) {
+
+            $callback($container);
+            
+        } else {
+            $container->setCore($canvas);
+        }
+
+        // setup image instance
+        $image = new \Intervention\Image\Image(new self, $container);
 
         return $image;
     }
@@ -58,11 +93,11 @@ class Driver extends \Intervention\Image\AbstractDriver
     }
 
     /**
-     * Checks if core module installation is available
+     * Checks if image module installation is available
      *
      * @return boolean
      */
-    protected function coreAvailable()
+    protected function moduleAvailable()
     {
         return (extension_loaded('gd') && function_exists('gd_info'));
     }
@@ -79,11 +114,45 @@ class Driver extends \Intervention\Image\AbstractDriver
         $clone = imagecreatetruecolor($width, $height);
         imagealphablending($clone, false);
         imagesavealpha($clone, true);
-        $transparency = imagecolorallocatealpha($clone, 0, 0, 0, 127);
-        imagefill($clone, 0, 0, $transparency);
         
         imagecopy($clone, $core, 0, 0, 0, 0, $width, $height);
 
         return $clone;
+    }
+
+    /**
+     * Returns clone of current container
+     *
+     * @param  ContainerInterface $container
+     * @return \Intervention\Image\Gd\Container
+     */
+    public function cloneContainer(ContainerInterface $container)
+    {
+        $cloneContainer = clone $container;
+        $cloneFrames = array();
+
+        // clone each resource of container
+        foreach ($container as $frame) {
+            $cloneFrames[] = new Frame($this->cloneCore($frame->getCore()));
+        }
+
+        $cloneContainer->setFrames($cloneFrames);
+
+        return $cloneContainer;
+    }
+
+    /**
+     * Builds new container from GD resource
+     *
+     * @param  resource $resource
+     * @return \Intervention\Image\Gd\Container
+     */
+    public function newContainer($resource)
+    {
+        $container = new Container;
+
+        $container->setFrames(array(new Frame($resource)));
+
+        return $container;
     }
 }

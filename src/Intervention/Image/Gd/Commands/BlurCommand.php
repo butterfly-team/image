@@ -2,12 +2,10 @@
 
 namespace Intervention\Image\Gd\Commands;
 
-use Intervention\Image\Commands\AbstractCommand;
-
-class BlurCommand extends AbstractCommand
+class BlurCommand extends \Intervention\Image\Commands\AbstractCommand
 {
     /**
-     * Applies blur effect on image
+     * Apply blur effect on image frames
      *
      * @param  \Intervention\Image\Image $image
      * @return boolean
@@ -16,10 +14,24 @@ class BlurCommand extends AbstractCommand
     {
         $amount = $this->argument(0)->between(0, 100)->value(1);
 
-        for ($i=0; $i < intval($amount); $i++) {
-            imagefilter($image->getCore(), IMG_FILTER_GAUSSIAN_BLUR);
+        foreach ($image as $frame) {
+            $this->applyBlur($frame->getCore(), $amount);
         }
 
         return true;
+    }
+
+    /**
+     * Apply blur effect on GD resource
+     *
+     * @param  resource $resource
+     * @param  integer  $amount
+     * @return void
+     */
+    private function applyBlur($resource, $amount)
+    {
+        for ($i=0; $i < intval($amount); $i++) {
+            imagefilter($resource, IMG_FILTER_GAUSSIAN_BLUR);
+        }
     }
 }

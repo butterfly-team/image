@@ -2,8 +2,6 @@
 
 namespace Intervention\Image\Gd;
 
-use Intervention\Image\Exception\NotSupportedException;
-
 class Encoder extends \Intervention\Image\AbstractEncoder
 {
     /**
@@ -48,30 +46,35 @@ class Encoder extends \Intervention\Image\AbstractEncoder
      */
     protected function processGif()
     {
-        ob_start();
-        imagegif($this->image->getCore());
-        $this->image->mime = image_type_to_mime_type(IMAGETYPE_GIF);
-        $buffer = ob_get_contents();
-        ob_end_clean();
+        $image = $this->image;
 
-        return $buffer;
-    }
+        $encoder = new Gif\Encoder;
+        $encoder->setCanvas($image->getWidth(), $image->getHeight());
+        $encoder->setLoops($image->getContainer()->getLoops());
 
-    protected function processWebp()
-    {
-        if ( ! function_exists('imagewebp')) {
-            throw new NotSupportedException(
-                "Webp format is not supported by PHP installation."
+        // set frames
+        foreach ($image as $frame) {
+
+            // extract each frame
+            ob_start();
+            imagegif($frame->getCore());
+            $frame_data = ob_get_contents();
+            ob_end_clean();
+
+            // decode frame
+            $decoder = new Gif\Decoder;
+            $decoder->initFromData($frame_data);
+            $decoded = $decoder->decode();
+
+            // add each frame
+            $encoder->addFrame(
+                $decoded->getFrame()
+                    ->setLocalColorTable($decoded->getGlobalColorTable())
+                    ->setDelay($frame->delay)
             );
         }
-
-        ob_start();
-        imagewebp($this->image->getCore(), null, $this->quality);
-        $this->image->mime = defined('IMAGETYPE_WEBP') ? image_type_to_mime_type(IMAGETYPE_WEBP) : 'image/webp';
-        $buffer = ob_get_contents();
-        ob_end_clean();
         
-        return $buffer;
+        return $encoder->encode();
     }
 
     /**
@@ -81,7 +84,7 @@ class Encoder extends \Intervention\Image\AbstractEncoder
      */
     protected function processTiff()
     {
-        throw new NotSupportedException(
+        throw new \Intervention\Image\Exception\NotSupportedException(
             "TIFF format is not supported by Gd Driver."
         );
     }
@@ -93,7 +96,7 @@ class Encoder extends \Intervention\Image\AbstractEncoder
      */
     protected function processBmp()
     {
-        throw new NotSupportedException(
+        throw new \Intervention\Image\Exception\NotSupportedException(
             "BMP format is not supported by Gd Driver."
         );
     }
@@ -105,7 +108,7 @@ class Encoder extends \Intervention\Image\AbstractEncoder
      */
     protected function processIco()
     {
-        throw new NotSupportedException(
+        throw new \Intervention\Image\Exception\NotSupportedException(
             "ICO format is not supported by Gd Driver."
         );
     }
@@ -117,7 +120,7 @@ class Encoder extends \Intervention\Image\AbstractEncoder
      */
     protected function processPsd()
     {
-        throw new NotSupportedException(
+        throw new \Intervention\Image\Exception\NotSupportedException(
             "PSD format is not supported by Gd Driver."
         );
     }
